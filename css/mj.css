@@ -184,8 +184,8 @@
 .md-typeset .mj-about p { text-indent: 0; }
 
 /* ---------- 牌桌重绘（牌桌样式在 tables/table.css；这里只管它在正文里的摆放） ----------
-   整块是一个 a.glightbox：点击牌桌任意处打开压缩原截图。右下角 .mj-orig 是「可看原图」小图标（纯 CSS 绘制，无文字）。
-   窄屏：牌桌设最小宽度，外层 .mj-table-scroll 横向滑动（点按仍打开原图；滑动不触发点击）。 */
+   整块是一个 a.glightbox：宽屏点击牌桌任意处打开压缩原截图。右下角 .mj-orig 是「可看原图」小图标（纯 CSS 绘制，无文字）。
+   窄屏：整桌缩小装进正文宽度；点牌桌打开全屏放大重绘（tables.js），点右下角图标打开原截图。 */
 .mj-table-block { --mj-table-min: 0px; margin: 1.6em 0; }
 .md-typeset a.mj-table-open {
   position: relative; display: block; color: inherit; border-radius: 6px; cursor: zoom-in;
@@ -209,28 +209,27 @@
 }
 .mj-table-block { --mj-orig-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23000' stroke-width='1.4' stroke-linejoin='round' d='M2.2 3h11.6a.8.8 0 0 1 .8.8v8.4a.8.8 0 0 1-.8.8H2.2a.8.8 0 0 1-.8-.8V3.8a.8.8 0 0 1 .8-.8z'/%3E%3Cpath fill='%23000' d='M2 12.6l3.6-4.4 2.6 3 1.9-2 3.9 3.4z'/%3E%3Ccircle fill='%23000' cx='11.2' cy='6' r='1.3'/%3E%3C/svg%3E"); }
 a.mj-table-open:hover .mj-orig, a.mj-table-open:focus-visible .mj-orig { opacity: 1; }
-/* 还能横滑的一侧画一条浅色渐变边 + 小箭头（tables.js 维护 data-more）：提示可滑动，纯图形、不含文字 */
-a.mj-table-open::before, a.mj-table-open::after {
-  content: ""; position: absolute; top: 0; bottom: 0; width: 26px; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .15s;
-  background-repeat: no-repeat; background-position: center; background-size: 14px 14px;
-}
-a.mj-table-open::before {
-  left: 0; border-radius: 6px 0 0 6px;
-  background-image: var(--mj-chev-l), linear-gradient(90deg, rgba(255, 255, 255, .30), rgba(255, 255, 255, 0));
-  background-size: 14px 14px, 100% 100%; background-position: 4px center, 0 0;
-}
-a.mj-table-open::after {
-  right: 0; border-radius: 0 6px 6px 0;
-  background-image: var(--mj-chev-r), linear-gradient(270deg, rgba(255, 255, 255, .30), rgba(255, 255, 255, 0));
-  background-size: 14px 14px, 100% 100%; background-position: right 4px center, 0 0;
-}
-.mj-table-block {
-  --mj-chev-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M9 2L4 7l5 5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  --mj-chev-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M5 2l5 5-5 5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-}
-a.mj-table-open[data-more*="l"]::before, a.mj-table-open[data-more*="r"]::after { opacity: 1; }
-/* 手机：牌桌按设计宽度 720px 排（牌河牌宽 18px、自家手牌 27px），比屏幕宽的部分横向滑动；
-   720 是实测折中：390 宽屏幕（内容宽 358）下 358/720 约一半可见，桌心（牌河 + 局名/余牌/点数）最宽 47% x 720 = 338px，恰好装进一屏 */
+/* 手机：整桌按 16:9 缩小装进正文宽度（不横滑）；点牌桌由 tables.js 打开全屏放大重绘，右下角小图标放大成可点的「看原截图」按钮 */
 @media screen and (max-width: 44.9375em) {
-  .mj-table-block { --mj-table-min: 720px; }
+  .mj-table-block .mj-orig { pointer-events: auto; width: 30px; height: 30px; right: 4px; bottom: 4px; opacity: .85; }
+  .mj-table-block .mj-orig::after { inset: 5px; }
+  .md-typeset a.mj-table-open { cursor: pointer; }
 }
+/* 全屏放大层（tables.js 生成，挂在 body 下） */
+html.mj-full-open, html.mj-full-open body { overflow: hidden; }
+.mj-full {
+  position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+  background: rgba(4, 10, 9, .94); cursor: zoom-out; -webkit-tap-highlight-color: transparent;
+}
+.mj-full-box { flex: none; }
+.mj-full-box.rot { transform: rotate(90deg); }
+.mj-full .mj-table { --tbl-font: "LXGW WenKai", "Microsoft YaHei", "PingFang SC", sans-serif; margin: 0; }
+.mj-full-x {                         /* 关闭：右上角圆形 + 叉（纯 CSS） */
+  position: fixed; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255, 255, 255, .16); box-shadow: 0 0 0 1px rgba(255, 255, 255, .35);
+}
+.mj-full-x::before, .mj-full-x::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 16px; height: 2px; margin: -1px 0 0 -8px; background: #fff; border-radius: 1px;
+}
+.mj-full-x::before { transform: rotate(45deg); }
+.mj-full-x::after { transform: rotate(-45deg); }

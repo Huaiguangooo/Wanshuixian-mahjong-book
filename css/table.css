@@ -1,0 +1,179 @@
+/* 雀魂牌谱回放牌桌重绘样式（配合 tables/render.py）。
+   .mj-table 是容器（container-type:inline-size，16:9）；内部尺寸全部以 --u（默认 1cqw = 容器宽的 1%）为单位，整体随容器缩放。
+   可在外层覆盖 --u 改变整体大小（例如 .mj-table{--u:12.8px} 固定为 1280px 设计宽度）。
+   四家各一个 .seat 坐标系：原点 = 中央块中心，x 向「该家的右」，y 向「朝向该家」（牌河第一行紧贴中央块，向外增长），
+   再 rotate 到各自方位（自家 0；下家/右 -90°；对家/上 180°；上家/左 +90°），所以每家看起来都是坐在那个位置的人正读。
+   牌面 SVG 为「无底板」图案，牌体（象牙白渐变、圆角、边框、厚度阴影）由本文件绘制。 */
+.mj-table {
+  --u: 1cqw;
+  position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; container-type: inline-size;
+  border-radius: 6px; user-select: none;
+  background:
+    radial-gradient(ellipse 70% 75% at 50% 48%, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 120% 120% at 50% 50%, #1f5f49 0%, #15493c 55%, #0b2c25 100%);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, .55);
+}
+.mj-table .stage {
+  --rw: calc(var(--u) * 2.5);      /* 牌河牌宽 */
+  --hw: calc(var(--u) * 3.8);      /* 自家手牌牌宽 */
+  --ow: calc(var(--u) * 1.9);      /* 他家手牌 / 他家副露牌宽 */
+  --dw: calc(var(--u) * 2.1);      /* 宝牌指示牌牌宽 */
+  --cx: 50; --cy: 25;              /* 中央块中心（单位 u，无单位数） */
+  --cs: 18;                        /* 中央块边长 */
+  --band: 3.1;                     /* 点数条厚度 */
+  --m: .6;                         /* 中央块与牌河间距 */
+  --H: 22.3;                       /* 他家手牌排距桌心 */
+  --w: var(--rw);
+  position: absolute; inset: 0;
+  font-family: var(--tbl-font, "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", "LXGW WenKai", sans-serif); color: #eef3ee;
+  /* 牌体配色 */
+  --body-top: #FFFEFB; --body-bot: #F1EDE0; --bd: #CFC9B6; --edge: #B4AE9A; --drop: rgba(0, 0, 0, .50);
+  --back-top: #2E4D92; --back-bot: #162550; --back-edge: #0B1636;
+}
+.mj-table .stage *, .mj-table .stage *::before, .mj-table .stage *::after { box-sizing: border-box; }
+
+/* ---------- 牌 ---------- */
+.mj-table .t {
+  --th: max(1px, calc(var(--w) * .06));
+  display: block; flex: none; margin: 0; max-width: none;
+  width: var(--w); height: calc(var(--w) * 4 / 3);
+  padding: calc(var(--w) * .085) calc(var(--w) * .075) calc(var(--w) * .075);
+  object-fit: contain;
+  background: linear-gradient(180deg, var(--body-top) 0%, var(--body-bot) 100%);
+  border: 1px solid var(--bd); border-radius: calc(var(--w) * .1);
+  box-shadow: 0 var(--th) 0 var(--edge), 0 calc(var(--th) + 1px) calc(var(--w) * .12) var(--drop), inset 0 1px 0 #fff;
+}
+.mj-table .t.b {                       /* 牌背：纯 CSS，深蓝 + 内框线 */
+  position: relative; padding: 0; border-color: #0a1330;
+  background: linear-gradient(145deg, var(--back-top), var(--back-bot));
+  box-shadow: 0 var(--th) 0 var(--back-edge), 0 calc(var(--th) + 1px) calc(var(--w) * .12) var(--drop), inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+.mj-table .t.b::after {
+  content: ""; position: absolute; inset: 12%; border-radius: calc(var(--w) * .06);
+  border: 1px solid rgba(190, 210, 255, .30);
+}
+.mj-table .tg { filter: brightness(.68) saturate(.85); }      /* 摸切牌变暗 */
+
+/* 横置牌：占 4/3w 宽、w 高；牌逆时针转 90°（牌头朝左，与实战一致） */
+.mj-table .side { position: relative; flex: none; width: calc(var(--w) * 4 / 3); height: var(--w); }
+.mj-table .side .t { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-90deg); }
+.mj-table .side .t:not(.b) { box-shadow: calc(var(--th) * -1) 0 0 var(--edge), calc(var(--th) * -1 - 1px) 0 calc(var(--w) * .12) var(--drop), inset 0 1px 0 #fff; }
+.mj-table .side .t.b { box-shadow: calc(var(--th) * -1) 0 0 var(--back-edge), calc(var(--th) * -1 - 1px) 0 calc(var(--w) * .12) var(--drop); }
+/* 加杠：加杠牌叠在横置牌上（朝外一侧） */
+.mj-table .kstack { display: flex; flex-direction: column; flex: none; gap: calc(var(--w) * .04); }
+
+/* ---------- 四家坐标系 ---------- */
+.mj-table .seat { position: absolute; left: calc(var(--cx) * var(--u)); top: calc(var(--cy) * var(--u)); width: 0; height: 0; transform-origin: 0 0; }
+.mj-table .seat.s0 { transform: rotate(0deg); }
+.mj-table .seat.s1 { transform: rotate(-90deg); }
+.mj-table .seat.s2 { transform: rotate(180deg); }
+.mj-table .seat.s3 { transform: rotate(90deg); }
+.mj-table .seat > * { position: absolute; }
+
+/* 牌河：第一行贴着中央块，行向「朝向该家」方向增长 */
+.mj-table .river {
+  --w: var(--rw);
+  left: calc(var(--rw) * -3.12); top: calc((var(--cs) / 2 + var(--m)) * var(--u));
+  display: flex; flex-direction: column; gap: calc(var(--rw) * .08);
+}
+.mj-table .river .row { display: flex; align-items: flex-end; gap: calc(var(--rw) * .05); white-space: nowrap; }
+
+/* 手牌条：手牌 + 摸牌 + 副露，沿本家视角从左到右 */
+.mj-table .strip { display: flex; align-items: flex-end; white-space: nowrap; }
+.mj-table .strip .main, .mj-table .strip .drawn, .mj-table .strip .melds, .mj-table .strip .meld {
+  display: flex; align-items: flex-end; flex: none; gap: calc(var(--w) * .04);
+}
+.mj-table .strip .drawn { margin-left: calc(var(--w) * .45); }
+.mj-table .strip .melds { margin-left: calc(var(--w) * .8); gap: calc(var(--w) * .3); }
+.mj-table .strip.hs { --w: var(--hw); left: calc((16 - var(--cx)) * var(--u)); top: calc((50 - var(--cy)) * var(--u)); }
+.mj-table .strip.ho { --w: var(--ow); left: calc(var(--u) * 13); top: calc(var(--H) * var(--u)); translate: -100% 0; }   /* 右端（含副露）对齐该家右手侧的外角 */
+
+/* 左右两家手牌排更靠近桌边（桌面横向空间更宽） */
+.mj-table .seat.s1 .strip.ho, .mj-table .seat.s3 .strip.ho { top: calc(var(--u) * 35); }
+
+/* ---------- 中央信息块 ---------- */
+.mj-table .center {
+  position: absolute; width: calc(var(--cs) * var(--u)); height: calc(var(--cs) * var(--u));
+  left: calc((var(--cx) - var(--cs) / 2) * var(--u)); top: calc((var(--cy) - var(--cs) / 2) * var(--u));
+  border-radius: calc(var(--u) * 1.1);
+  background: linear-gradient(160deg, rgba(8, 26, 21, .85), rgba(3, 14, 11, .92));
+  border: 1px solid rgba(180, 220, 200, .30);
+  box-shadow: 0 calc(var(--u) * .2) calc(var(--u) * .8) rgba(0, 0, 0, .5), inset 0 0 calc(var(--u) * 1.6) rgba(120, 200, 170, .08);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.15;
+}
+.mj-table .center .round { font-size: calc(var(--u) * 2.4); font-weight: 700; letter-spacing: .05em; color: #fff; }
+.mj-table .center .left { font-size: calc(var(--u) * 1.7); margin-top: calc(var(--u) * .35); color: #ffd98a; font-variant-numeric: tabular-nums; }
+.mj-table .center .turn { font-size: calc(var(--u) * 1.3); margin-top: calc(var(--u) * .35); color: #8fb5a6; }
+/* 点数条：每家一条，位于各自 seat 坐标系内、贴中央块该家一侧 */
+.mj-table .band {
+  left: calc((var(--band) - var(--cs) / 2) * var(--u)); width: calc((var(--cs) - 2 * var(--band)) * var(--u));
+  top: calc((var(--cs) / 2 - var(--band) + .15) * var(--u)); height: calc((var(--band) - .3) * var(--u));
+  display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * .5);
+}
+.mj-table .wind {
+  width: calc(var(--u) * 1.9); height: calc(var(--u) * 1.9); border-radius: calc(var(--u) * .3); flex: none;
+  display: flex; align-items: center; justify-content: center; font-size: calc(var(--u) * 1.2); font-weight: 700;
+  background: #243d35; color: #e9f2ee; border: 1px solid rgba(190, 225, 210, .4);
+}
+.mj-table .wind.dealer { background: #c4302b; border-color: #ff9a8f; color: #fff; box-shadow: 0 0 calc(var(--u) * .5) rgba(255, 90, 70, .55); }
+.mj-table .score { font-size: calc(var(--u) * 1.55); font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mj-table .stick {                         /* 立直棒：白色小条 + 红点 */
+  position: relative; flex: none; width: calc(var(--u) * 2.4); height: calc(var(--u) * .5); border-radius: calc(var(--u) * .25);
+  background: linear-gradient(180deg, #fff, #d4d4d4); box-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+}
+.mj-table .stick::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: calc(var(--u) * .3); height: calc(var(--u) * .3);
+  margin: calc(var(--u) * -.15) 0 0 calc(var(--u) * -.15); border-radius: 50%; background: #d3202a;
+}
+
+/* ---------- 宝牌指示区（左上，5 格；无文字标签）+ 其下「千点棒图标 x供托数  百点棒图标 x本场数」（照截图左上角） ---------- */
+.mj-table .dora {
+  position: absolute; left: calc(var(--u) * 1.2); top: calc(var(--u) * 1.0); --w: var(--dw);
+  padding: calc(var(--u) * .6) calc(var(--u) * .7) calc(var(--u) * .5);
+  background: rgba(7, 22, 38, .78); border: 1px solid rgba(200, 160, 74, .55); border-radius: calc(var(--u) * .9);
+  box-shadow: 0 calc(var(--u) * .2) calc(var(--u) * .7) rgba(0, 0, 0, .45);
+}
+.mj-table .dora .slots { display: flex; gap: calc(var(--u) * .25); }
+.mj-table .dora .sticks {
+  display: flex; align-items: center; justify-content: space-between; margin-top: calc(var(--u) * .65);
+  padding: 0 calc(var(--u) * .3); font-size: calc(var(--u) * 1.5); font-weight: 700; color: #fff; line-height: 1;
+}
+.mj-table .dora .sticks .x { margin: 0 calc(var(--u) * .35) 0 calc(var(--u) * .45); font-variant-numeric: tabular-nums; font-style: italic; }
+.mj-table .dora .sticks .x:last-child { margin-right: 0; }
+.mj-table .ic {                              /* 点棒图标：白色竖条（千点棒一个红点；百点棒两列小黑点），纯 CSS */
+  position: relative; display: inline-block; flex: none; width: calc(var(--u) * .78); height: calc(var(--u) * 2.1);
+  border-radius: calc(var(--u) * .22); background: linear-gradient(90deg, #fff, #d6d6d6); box-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+}
+.mj-table .ic.k1000::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: calc(var(--u) * .36); height: calc(var(--u) * .36);
+  margin: calc(var(--u) * -.18) 0 0 calc(var(--u) * -.18); border-radius: 50%; background: #d3202a;
+}
+.mj-table .ic.k100::after {
+  content: ""; position: absolute; inset: calc(var(--u) * .18) calc(var(--u) * .08);      /* 2 列 x 4 行小黑点 */
+  background: radial-gradient(circle at 50% 50%, #2a2a2a 0 27%, transparent 31%) 0 0 / 50% 25%;
+}
+
+/* ---------- 名牌（四角）：头像（圆角小方块，藏青底 + 金色描边，同 results/result.css 的 .mj-rs-av）+ 昵称 ---------- */
+.mj-table .name {
+  --nav: #1F3A5F; --gold: #C8A04A;
+  position: absolute; max-width: calc(var(--u) * 17); height: calc(var(--u) * 4.6);
+  display: flex; align-items: center; gap: calc(var(--u) * .7);
+  padding: calc(var(--u) * .3) calc(var(--u) * 1.1) calc(var(--u) * .3) calc(var(--u) * .3);
+  font-size: calc(var(--u) * 1.3); font-weight: 600; white-space: nowrap;
+  background: rgba(6, 20, 17, .75); border: 1px solid rgba(180, 220, 200, .32); border-radius: calc(var(--u) * 1.1); color: #f1f6f3;
+}
+.mj-table .name.dealer { border-color: #ff9a8f; }
+.mj-table .name .av {
+  flex: none; width: calc(var(--u) * 3.9); height: calc(var(--u) * 3.9); border-radius: calc(var(--u) * .7); object-fit: cover;
+  border: max(1px, calc(var(--u) * .16)) solid var(--gold); background: var(--nav); box-sizing: border-box;
+}
+.mj-table .name .av.none { display: flex; align-items: center; justify-content: center; font-size: calc(var(--u) * 1.5); color: var(--gold); }
+.mj-table .name .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.mj-table .name.n0 { left: calc(var(--u) * 1.5); bottom: calc(var(--u) * 1.2); }
+.mj-table .name.n1 { right: calc(var(--u) * 1.5); bottom: calc(var(--u) * 3.4); }   /* 抬高一点，右下角留给网站的「看原图」小图标 */
+.mj-table .name.n2 { right: calc(var(--u) * 1.5); top: calc(var(--u) * 1.2); }
+.mj-table .name.n3 { left: calc(var(--u) * 1.5); top: calc(var(--u) * 9.5); }
+
+/* ---------- 独立页面 ---------- */
+body.mj-page { margin: 0; padding: 12px; background: #0b1311; }
+body.mj-page .mj-wrap { max-width: 1280px; margin: 0 auto; }

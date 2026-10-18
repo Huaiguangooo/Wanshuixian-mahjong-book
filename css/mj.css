@@ -1,0 +1,236 @@
+/* 麻将书网站样式（SPEC §5e）。颜色/字体/版式；不含任何正文。 */
+
+/* ---------- 字体与变量 ---------- */
+@font-face {
+  font-family: "LXGW WenKai";
+  font-style: normal;
+  font-weight: 300 400;
+  font-display: swap;
+  src: url("../fonts/LXGWWenKai-Regular.subset.woff2") format("woff2");
+}
+@font-face {
+  font-family: "LXGW WenKai";
+  font-style: normal;
+  font-weight: 500 900;
+  font-display: swap;
+  src: url("../fonts/LXGWWenKai-Medium.subset.woff2") format("woff2");
+}
+
+/* 色板：主色深靛蓝 #1F3A5F，强调色金 #C8A04A；原文红/蓝强调色取 SPEC §5e */
+:root {
+  --md-text-font: "LXGW WenKai";
+  --mj-red: #C62828;
+  --mj-blue: #0B6FB8;
+  --mj-hl-bg: #FFF3B0;
+  --mj-hl-fg: inherit;
+  --mj-line: rgba(31, 58, 95, .14);
+  --mj-gold: #C8A04A;
+  --mj-mute: #8a8e97;
+  --mj-img-edge: rgba(31, 58, 95, .10);
+}
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: #FCFBF8;
+  --md-default-fg-color: rgba(28, 32, 40, .92);
+  --md-default-fg-color--light: rgba(28, 32, 40, .62);
+  --md-primary-fg-color: #1F3A5F;
+  --md-primary-fg-color--light: #3E5C86;
+  --md-primary-fg-color--dark: #162B47;
+  --md-accent-fg-color: #A9822C;
+  --md-typeset-a-color: #2A5389;
+  --md-code-bg-color: #F3F1EA;
+  --md-footer-bg-color: #162B47;
+  --md-footer-bg-color--dark: #101F35;
+}
+[data-md-color-scheme="slate"] {
+  --md-hue: 220;
+  --md-default-bg-color: #14181F;
+  --md-default-bg-color--light: rgba(20, 24, 31, .54);
+  --md-default-fg-color: rgba(226, 229, 234, .84);
+  --md-default-fg-color--light: rgba(232, 234, 238, .62);
+  --md-primary-fg-color: #1B2A42;
+  --md-primary-fg-color--light: #34496B;
+  --md-primary-fg-color--dark: #121C2D;
+  --md-accent-fg-color: #D9B45F;
+  --md-typeset-a-color: #8DB4E8;
+  --md-footer-bg-color: #0E1219;
+  --md-footer-bg-color--dark: #0A0D13;
+  --mj-red: #FF6B6B;
+  --mj-blue: #5EC8FF;
+  --mj-hl-bg: #5A4A00;
+  --mj-hl-fg: #FFF3B0;
+  --mj-line: rgba(255, 255, 255, .14);
+  --mj-mute: #6f7581;
+  --mj-img-edge: rgba(255, 255, 255, .16);
+}
+::selection { background: rgba(200, 160, 74, .35); }
+
+/* 页眉：站名 + 作者（次要） */
+.md-header { box-shadow: 0 1px 0 rgba(200, 160, 74, .55), 0 2px 8px rgba(0, 0, 0, .12); }
+.md-footer-meta { font-size: .7rem; }
+.md-header__title { font-weight: 500; letter-spacing: .04em; }
+.mj-author { margin-left: 1em; font-size: .78em; font-weight: 400; letter-spacing: .08em; opacity: .68; }
+@media screen and (max-width: 44.9375em) { .mj-author { display: none; } }
+.md-search__input, .md-nav, .md-footer, .md-source { font-family: var(--md-text-font), sans-serif; }
+.md-nav__link--active, .md-nav__item .md-nav__link--active { color: var(--md-typeset-a-color); }
+
+.md-grid { max-width: 66rem; }
+/* 行宽约 40 个汉字（18px 字号下 720px），内容区在可用宽度内居中 */
+.md-content__inner { max-width: 45.5rem; }
+@media screen and (min-width: 60em) { .md-content__inner { margin-left: auto; margin-right: auto; } }
+
+/* ---------- 正文 ---------- */
+.md-typeset { font-size: .9rem; line-height: 1.85; }
+.md-typeset p { margin: 0 0 .7em; }
+.md-typeset a { text-underline-offset: .2em; }
+.md-typeset p.mj-p { text-indent: 2em; text-align: justify; }
+.md-typeset p.mj-center { text-align: center; text-indent: 0; }
+.md-typeset p.mj-right { text-align: right; text-indent: 0; }
+/* 首页：作者手写目录，逐行 */
+.md-typeset p.mj-toc { text-indent: 0; text-align: left; margin: 0 0 .15em; }
+.md-typeset p.mj-toc.mj-right { text-align: right; margin-top: 1.6em; color: var(--md-default-fg-color--light); }
+.md-typeset p.mj-toc.mj-vol { margin-top: .9em; }
+.md-typeset p.mj-toc.mj-vol, .md-typeset p.mj-toc.mj-vol strong { font-weight: 700; }
+/* 首页目录：可点击行统一用链接色（卷名行的原文蓝色也并入链接色）；未写条目为次要灰、不可点 */
+.md-typeset p.mj-toc a { color: var(--md-typeset-a-color); }
+.md-typeset p.mj-toc a strong.mj-blue { color: inherit; }
+.md-typeset p.mj-toc.mj-todo, .md-typeset p.mj-toc.mj-todo strong.mj-blue { color: var(--mj-mute); }
+
+.md-typeset strong.mj-red { color: var(--mj-red); font-weight: 500; }
+.md-typeset strong.mj-blue { color: var(--mj-blue); font-weight: 500; }
+
+/* 卷名小标题（序与前言页顶部） */
+.md-typeset p.mj-volume {
+  text-indent: 0; margin: 0 0 .2em;
+  font-size: .8em; font-weight: 500; letter-spacing: .12em;
+  color: var(--md-default-fg-color--light);
+}
+
+/* ---------- 标题 ---------- */
+.md-typeset h1, .md-typeset h2, .md-typeset h3 {
+  font-weight: 500; letter-spacing: .03em; color: var(--md-default-fg-color);
+}
+.md-typeset h1 { font-size: 1.75em; line-height: 1.4; margin: 0 0 1.3em; }
+.md-typeset h1::after {
+  content: ""; display: block; width: 2.2em; height: 3px; margin-top: .45em;
+  background: var(--mj-gold); border-radius: 2px;
+}
+.md-typeset h2 {
+  font-size: 1.3em; line-height: 1.5; margin: 2.2em 0 .8em;
+  padding: .05em 0 .05em .6em; border-left: 3px solid var(--mj-gold);
+}
+.md-typeset h3 { font-size: 1.05em; line-height: 1.6; margin: 1.7em 0 .7em; }
+.mj-num { margin-right: .05em; }
+/* 黄色高亮小小节标题 */
+.md-typeset h3.mj-hl {
+  display: table; max-width: 100%;
+  background: var(--mj-hl-bg); color: var(--mj-hl-fg);
+  padding: .1em .6em; border-radius: .2em;
+}
+
+/* ---------- 截图 ---------- */
+.md-typeset p.mj-img { margin: 1.2em 0; text-indent: 0; }
+.md-typeset p.mj-img a.glightbox, .md-typeset p.mj-img img { display: block; }
+.md-typeset p.mj-img img {
+  width: 100%; height: auto; border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--mj-img-edge), 0 2px 8px rgba(20, 30, 50, .10);
+}
+[data-md-color-scheme="slate"] .md-typeset p.mj-img img { filter: brightness(.92); box-shadow: 0 0 0 1px var(--mj-img-edge); }
+
+/* ---------- 手牌（牌体样式在 hands/hand.css） ---------- */
+.mj-hand-block { margin: 1.6em 0; }
+.md-typeset p.mj-hand-header {
+  text-indent: 0; text-align: left; margin: 0 0 .5em;
+  font-size: .78em; letter-spacing: .06em; color: var(--md-default-fg-color--light);
+}
+
+/* ---------- 结算卡片（样式在 results/result.css；这里只抵消 Material .md-typeset 对 ul/ol/li/img 的默认外观） ---------- */
+.mj-result-block { margin: 1.6em 0; }
+.md-typeset .mj-result-block .mj-rs { margin: 0; }
+.md-typeset .mj-rs ul, .md-typeset .mj-rs ol { margin: 0; padding: 0; list-style: none; }
+.md-typeset .mj-rs ul li, .md-typeset .mj-rs ol li { margin: 0; }
+.md-typeset .mj-rs img.mj-rs-av { height: 44px; max-width: none; }
+@media (max-width: 520px) { .md-typeset .mj-rs-rows img.mj-rs-av { height: 36px; } }
+
+/* ---------- 表格 ---------- */
+.md-typeset table:not([class]) { font-size: .8rem; }
+.md-typeset table:not([class]) th, .md-typeset table:not([class]) td {
+  text-align: center; min-width: 4.5em; white-space: nowrap;
+}
+.md-typeset table:not([class]) th { font-weight: 500; background: rgba(31, 58, 95, .06); color: var(--md-default-fg-color); }
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th { background: rgba(255, 255, 255, .06); }
+/* 万一仍放不下：横向滚动 + 右侧渐隐提示 */
+.md-typeset__scrollwrap {
+  background:
+    linear-gradient(to right, var(--md-default-bg-color) 30%, transparent) 0 0 / 2.4em 100% no-repeat local,
+    linear-gradient(to left, var(--md-default-bg-color) 30%, transparent) 100% 0 / 2.4em 100% no-repeat local,
+    linear-gradient(to left, rgba(31, 58, 95, .22), transparent) 100% 0 / .9em 100% no-repeat scroll;
+}
+
+/* ---------- 窄屏 ---------- */
+@media screen and (max-width: 44.9375em) {
+  .md-typeset { font-size: .85rem; line-height: 1.8; }
+  /* 6 列表格尽量放进一屏：缩小字号与内边距，表头允许换行 */
+  .md-typeset table:not([class]) { font-size: .56rem; }
+  .md-typeset table:not([class]) th, .md-typeset table:not([class]) td {
+    min-width: 0; padding: .55em .25em; line-height: 1.45;
+  }
+  .md-typeset table:not([class]) th { white-space: normal; word-break: break-all; }
+  .md-typeset__table { padding: 0 !important; }
+  .md-typeset h1 { font-size: 1.45em; }
+  .md-typeset h2 { font-size: 1.2em; }
+}
+
+/* 关于页 */
+.md-typeset .mj-about p { text-indent: 0; }
+
+/* ---------- 牌桌重绘（牌桌样式在 tables/table.css；这里只管它在正文里的摆放） ----------
+   整块是一个 a.glightbox：点击牌桌任意处打开压缩原截图。右下角 .mj-orig 是「可看原图」小图标（纯 CSS 绘制，无文字）。
+   窄屏：牌桌设最小宽度，外层 .mj-table-scroll 横向滑动（点按仍打开原图；滑动不触发点击）。 */
+.mj-table-block { --mj-table-min: 0px; margin: 1.6em 0; }
+.md-typeset a.mj-table-open {
+  position: relative; display: block; color: inherit; border-radius: 6px; cursor: zoom-in;
+  box-shadow: 0 0 0 1px var(--mj-img-edge), 0 2px 8px rgba(20, 30, 50, .10);
+}
+[data-md-color-scheme="slate"] .md-typeset a.mj-table-open { box-shadow: 0 0 0 1px var(--mj-img-edge); }
+.mj-table-scroll { overflow-x: auto; border-radius: 6px; scrollbar-width: none; overscroll-behavior-x: contain; }
+.mj-table-scroll::-webkit-scrollbar { display: none; }
+.mj-table-scroll .mj-table { min-width: var(--mj-table-min); }
+.mj-table-block .mj-table { --tbl-font: "LXGW WenKai", "Microsoft YaHei", "PingFang SC", sans-serif; }
+.md-typeset .mj-table-block .mj-table { margin: 0; }
+.md-typeset .mj-table-block img.t { height: calc(var(--w) * 4 / 3); }   /* 抵消 .md-typeset img 的 height:auto */
+.md-typeset .mj-table-orig img.mj-table-img { display: block; width: 100%; height: auto; max-width: 100%; margin: 0; border-radius: 6px; }   /* 显示原图的牌桌块 */
+.mj-orig {
+  position: absolute; right: 8px; bottom: 8px; width: 22px; height: 22px; border-radius: 6px; pointer-events: none;
+  background: rgba(8, 20, 17, .62); box-shadow: 0 0 0 1px rgba(255, 255, 255, .28); opacity: .72; transition: opacity .15s;
+}
+.mj-orig::after {                    /* 「图片」小图标：圆角框 + 山形 + 太阳，SVG 遮罩着色 */
+  content: ""; position: absolute; inset: 3px; background: #fff;
+  -webkit-mask: var(--mj-orig-svg) center / contain no-repeat; mask: var(--mj-orig-svg) center / contain no-repeat;
+}
+.mj-table-block { --mj-orig-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23000' stroke-width='1.4' stroke-linejoin='round' d='M2.2 3h11.6a.8.8 0 0 1 .8.8v8.4a.8.8 0 0 1-.8.8H2.2a.8.8 0 0 1-.8-.8V3.8a.8.8 0 0 1 .8-.8z'/%3E%3Cpath fill='%23000' d='M2 12.6l3.6-4.4 2.6 3 1.9-2 3.9 3.4z'/%3E%3Ccircle fill='%23000' cx='11.2' cy='6' r='1.3'/%3E%3C/svg%3E"); }
+a.mj-table-open:hover .mj-orig, a.mj-table-open:focus-visible .mj-orig { opacity: 1; }
+/* 还能横滑的一侧画一条浅色渐变边 + 小箭头（tables.js 维护 data-more）：提示可滑动，纯图形、不含文字 */
+a.mj-table-open::before, a.mj-table-open::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 26px; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .15s;
+  background-repeat: no-repeat; background-position: center; background-size: 14px 14px;
+}
+a.mj-table-open::before {
+  left: 0; border-radius: 6px 0 0 6px;
+  background-image: var(--mj-chev-l), linear-gradient(90deg, rgba(255, 255, 255, .30), rgba(255, 255, 255, 0));
+  background-size: 14px 14px, 100% 100%; background-position: 4px center, 0 0;
+}
+a.mj-table-open::after {
+  right: 0; border-radius: 0 6px 6px 0;
+  background-image: var(--mj-chev-r), linear-gradient(270deg, rgba(255, 255, 255, .30), rgba(255, 255, 255, 0));
+  background-size: 14px 14px, 100% 100%; background-position: right 4px center, 0 0;
+}
+.mj-table-block {
+  --mj-chev-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M9 2L4 7l5 5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --mj-chev-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M5 2l5 5-5 5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+a.mj-table-open[data-more*="l"]::before, a.mj-table-open[data-more*="r"]::after { opacity: 1; }
+/* 手机：牌桌按设计宽度 720px 排（牌河牌宽 18px、自家手牌 27px），比屏幕宽的部分横向滑动；
+   720 是实测折中：390 宽屏幕（内容宽 358）下 358/720 约一半可见，桌心（牌河 + 局名/余牌/点数）最宽 47% x 720 = 338px，恰好装进一屏 */
+@media screen and (max-width: 44.9375em) {
+  .mj-table-block { --mj-table-min: 720px; }
+}

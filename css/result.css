@@ -1,0 +1,75 @@
+/* 结算卡片（配合 results/render.py；牌体样式来自 hands/hand.css）。
+   与网站同一视觉语言：藏青 #1F3A5F、金 #C8A04A、字体继承页面（霞鹜文楷）。 */
+.mj-rs {
+  --rs-bg: #F6F3EA; --rs-bd: #E2DCCB; --rs-ink: #1F2A37; --rs-sub: #6B6455;
+  --rs-navy: #1F3A5F; --rs-gold: #C8A04A; --rs-gold-ink: #9A7425; --rs-pos: #2E7D32; --rs-neg: #C62828;
+  background: var(--rs-bg); border: 1px solid var(--rs-bd); border-radius: 10px;
+  padding: 14px 16px 16px; color: var(--rs-ink); margin: 0 0 1em;
+  box-shadow: 0 1px 2px rgba(31, 58, 95, .06), 0 6px 18px rgba(31, 58, 95, .07);
+}
+[data-md-color-scheme="slate"] .mj-rs {
+  --rs-bg: #1B2230; --rs-bd: #2C3647; --rs-ink: #E6E3DA; --rs-sub: #A39C8C;
+  --rs-navy: #8FB3E0; --rs-gold: #D9B66A; --rs-gold-ink: #E2C27C; --rs-pos: #66BB6A; --rs-neg: #FF6B6B;
+  box-shadow: none;
+}
+.mj-rs-av {
+  width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex: none;
+  border: 2px solid var(--rs-gold); background: var(--rs-bd);
+}
+.mj-rs-av-none { display: inline-block; }
+
+/* ---- 和牌 ---- */
+.mj-rs-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.mj-rs-name { font-weight: 600; font-size: 1.05em; }
+.mj-rs-agari {
+  margin-left: auto; color: #fff; background: var(--rs-neg); border-radius: 4px;
+  padding: 1px 10px; font-weight: 600; letter-spacing: .1em;
+}
+.mj-rs-k-hora .mj-hand { --mj-tile-max: 46px; }
+.mj-rs-win { margin-left: calc(var(--u) * .5); }
+.mj-rs-inds .mj-inner { flex-direction: row; flex-wrap: wrap; gap: 6px 22px; margin-top: 10px; }
+.mj-rs-ind { display: flex; align-items: center; gap: 8px; }
+.mj-rs-lab { font-size: .82em; color: var(--rs-sub); }
+.mj-rs-ind .mj-dora img { --w: calc(var(--u) * .62); }
+.mj-rs-body { display: flex; align-items: flex-end; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+.mj-rs-yaku {
+  list-style: none; margin: 0; padding: 0; flex: 1 1 260px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 18px;
+}
+.mj-rs-yaku li { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--rs-bd); padding: 2px 0; margin: 0; }
+.mj-rs-yaku b { color: var(--rs-gold-ink); font-weight: 600; }
+.mj-rs-total { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
+.mj-rs-fu { color: var(--rs-sub); }
+.mj-rs-han { font-size: 1.25em; font-weight: 600; color: var(--rs-navy); }
+.mj-rs-pts { font-size: 1.9em; font-weight: 600; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.mj-rs-tier {
+  color: var(--rs-gold-ink); font-weight: 600; font-size: 1.25em;
+  border: 1.5px solid var(--rs-gold); border-radius: 4px; padding: 0 8px;
+}
+
+/* ---- 终局 / 顺位 ---- */
+.mj-rs-title { font-weight: 600; letter-spacing: .3em; color: var(--rs-navy); margin-bottom: 8px; }
+.mj-rs-rows { list-style: none; margin: 0; padding: 0; }
+.mj-rs-rows li {
+  display: grid; grid-template-columns: 3.2em 44px minmax(0, 1fr) auto auto auto; align-items: center;
+  gap: 10px; padding: 7px 4px; margin: 0; border-bottom: 1px solid var(--rs-bd);
+}
+.mj-rs-rows li:last-child { border-bottom: 0; }
+.mj-rs-rows li.r1 { background: linear-gradient(90deg, rgba(200, 160, 74, .16), transparent 70%); border-radius: 6px; }
+.mj-rs-rank { font-size: 1.5em; font-weight: 600; color: var(--rs-navy); text-align: center; line-height: 1; }
+.mj-rs-rank small { font-size: .5em; margin-left: 1px; color: var(--rs-sub); }
+.mj-rs-rows .mj-rs-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mj-rs-self { font-size: .75em; color: #fff; background: var(--rs-neg); border-radius: 3px; padding: 0 5px; }
+.mj-rs-score { font-size: 1.25em; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; grid-column: 5; }
+.mj-rs-delta { font-variant-numeric: tabular-nums; min-width: 3.6em; text-align: right; grid-column: 6; }
+.mj-rs-delta.pos { color: var(--rs-pos); } .mj-rs-delta.neg { color: var(--rs-neg); }
+.mj-rs-k-rank .mj-rs-delta { display: none; }
+
+@media (max-width: 520px) {
+  .mj-rs { padding: 12px; }
+  .mj-rs-pts { font-size: 1.6em; }
+  .mj-rs-rows li { grid-template-columns: 2.4em 36px minmax(0, 1fr) auto auto; gap: 6px; }
+  .mj-rs-rows .mj-rs-av { width: 36px; height: 36px; }
+  .mj-rs-self { display: none; }
+  .mj-rs-score { grid-column: 4; } .mj-rs-delta { grid-column: 5; }
+}

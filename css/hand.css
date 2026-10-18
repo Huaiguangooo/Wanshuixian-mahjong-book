@@ -1,0 +1,67 @@
+/* 手牌渲染样式（配合 hands/render.py；牌面用 assets/tiles/face/ 的「无底板」SVG，牌体由本文件绘制）。
+   牌宽 --u = min(--mj-tile-max, 容器宽 / --n)；--n 为整行以牌宽计的总宽度（含间隙），不换行、不溢出。 */
+.mj-hand {
+  container-type: inline-size; width: 100%; --mj-tile-max: 52px;
+  /* 牌体配色（浅色） */
+  --mj-body-top: #FFFEFB; --mj-body-bot: #F3F0E6; --mj-bd: #D9D4C4; --mj-edge: #C9C4B5;
+  --mj-ring: 0 0 0 0 transparent; --mj-drop: rgba(40, 30, 10, .20);
+  --mj-back-top: #2B4580; --mj-back-bot: #16244F; --mj-back-edge: #0E1A3E;
+}
+/* 深色：牌体仍为浅色，加暗色描边与更重的投影。独立使用时跟随系统；嵌入 material 时以主题切换（data-md-color-scheme）为准 */
+@media (prefers-color-scheme: dark) {
+  body:not([data-md-color-scheme]) .mj-hand {
+  --mj-bd: #7E796B; --mj-edge: #8E8978; --mj-ring: 0 0 0 1px rgba(5, 8, 14, .85); --mj-drop: rgba(0, 0, 0, .55);
+  --mj-back-edge: #0A1330;
+  }
+}
+[data-md-color-scheme="slate"] .mj-hand, .mj-hand[data-md-color-scheme="slate"] {
+  --mj-bd: #7E796B; --mj-edge: #8E8978; --mj-ring: 0 0 0 1px rgba(5, 8, 14, .85); --mj-drop: rgba(0, 0, 0, .55);
+  --mj-back-edge: #0A1330;
+}
+.mj-inner {
+  --u: min(var(--mj-tile-max), calc(100cqw / var(--n)));
+  --g: calc(var(--u) * .06);
+  display: flex; flex-direction: column; gap: calc(var(--u) * .34);
+  padding-bottom: calc(var(--u) * .12);          /* 给牌厚阴影留位 */
+}
+
+/* 单张牌：img 本身就是牌体（背景 + 描边 + 圆角 + 厚度），SVG 图案由 padding 留出边距 */
+.mj-hand img {
+  --w: var(--u);
+  --th: max(1px, calc(var(--w) * .05));
+  display: block; flex: none; box-sizing: border-box; user-select: none; max-width: none; margin: 0;
+  width: var(--w); height: calc(var(--w) * 4 / 3);
+  padding: calc(var(--w) * .085) calc(var(--w) * .075) calc(var(--w) * .075);
+  object-fit: contain;
+  background: linear-gradient(180deg, var(--mj-body-top) 0%, var(--mj-body-bot) 100%);
+  border: 1px solid var(--mj-bd); border-radius: calc(var(--w) * .1);
+  box-shadow:
+    var(--mj-ring),
+    0 var(--th) 0 var(--mj-edge),
+    0 calc(var(--th) + 1px) calc(var(--w) * .09) var(--mj-drop),
+    inset 0 1px 0 #fff;
+}
+/* 牌背：深蓝、细边框（SVG 自带圆角与双线边框） */
+.mj-hand img.b {
+  padding: 0; border: 0;
+  background: linear-gradient(135deg, var(--mj-back-top), var(--mj-back-bot));
+  box-shadow: var(--mj-ring), 0 var(--th) 0 var(--mj-back-edge), 0 calc(var(--th) + 1px) calc(var(--w) * .09) var(--mj-drop);
+}
+
+/* 宝牌区：半宽牌 */
+.mj-dora { display: flex; gap: var(--g); }
+.mj-dora img { --w: calc(var(--u) * .5); }
+
+/* 手牌 → 小间隙 → 摸牌 → 较大间隙 → 副露（横置牌底对齐） */
+.mj-row { display: flex; align-items: flex-end; gap: var(--g); white-space: nowrap; }
+.mj-main, .mj-meld, .mj-melds, .mj-drawn { display: flex; align-items: flex-end; flex: none; gap: var(--g); }
+.mj-drawn { margin-left: calc(var(--u) * .34); }
+.mj-melds { margin-left: calc(var(--u) * .80); }
+.mj-meld + .mj-meld { margin-left: calc(var(--u) * .24); }
+/* 横置牌：占 4/3u 宽、u 高 */
+.mj-side { position: relative; flex: none; width: calc(var(--u) * 4 / 3); height: var(--u); }
+.mj-side img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(90deg); }
+/* 旋转后牌厚朝向屏幕下方：在旋转前坐标系里是 +x 方向 */
+.mj-side img:not(.b) {
+  box-shadow: var(--mj-ring), var(--th) 0 0 var(--mj-edge), calc(var(--th) + 1px) 0 calc(var(--w) * .09) var(--mj-drop), inset 0 1px 0 #fff;
+}
